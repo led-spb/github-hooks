@@ -5,6 +5,7 @@ import hashlib
 import json
 import logging
 import subprocess
+import shlex
 from collections import defaultdict
 
 
@@ -66,7 +67,7 @@ class GitHubEventProcessor(object):
     def run_command(self, data):
         update_cmd = self.cmd_template.format(**data)
 
-        logging.info('Running command %s', update_cmd)
+        logging.info('Running command %s', shlex.split(update_cmd))
         try:
             process = subprocess.Popen(
                 update_cmd,
