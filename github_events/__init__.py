@@ -22,15 +22,15 @@ class GitHubEventProcessor(object):
 
     def parse_events(self):
         _, _, files = list(os.walk(self.events_dir))[0]
-
         for fname in files:
+            logging.debug(fname)
             full_name = os.path.join(self.events_dir, fname)
             event_id, event_type = fname.split('.')
             if event_type == 'sign':
                 payload_key = 'signature'
             else:
                 payload_key = 'payload'
-                self.events[event_id] = {'type': event_type}
+                self.events[event_id]['type'] = event_type
 
             with open(full_name) as f:
                 self.events[event_id][payload_key] = f.read()
@@ -43,6 +43,7 @@ class GitHubEventProcessor(object):
             signature = 'sha1=' + hmac.new(self.sign_key, data['payload'], hashlib.sha1).hexdigest()
             data['payload'] = json.loads(data['payload'])
             data['verified'] = signature == data['signature']
+            logging.debug(json.dumps(data, indent=2))
         pass
 
     def process_events(self):
