@@ -71,6 +71,7 @@ class GitHubEventProcessor(object):
         try:
             process = subprocess.Popen(
                 update_cmd,
+                shell=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT
