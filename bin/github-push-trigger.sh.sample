@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+usage(){
+   echo "Usage: $0 -n REPOSITORY_NAME [-u CLONE_URL] -b BRANCH -c COMMIT_HASH"
+   exit 1;
+}
+
+while getopts “:n:u:b:c:f” opt; do
+  case $opt in
+    n) REPOSITORY_NAME=$OPTARG ;;
+    u) REPOSITORY_URL=$OPTARG ;;
+    b) BRANCH=${OPTARG##refs/heads/} ;;
+    c) COMMIT_HASH=$OPTARG ;;
+    *) usage ;;
+  esac
+done
+
+test -z "$REPOSITORY_NAME" && usage
+test -z "$BRANCH" && usage
+
+# Skip pushes when branch is not master
+if [ "$BRANCH" != "master"  ]; then
+  exit 0
+fi
+
+if [ -z "$REPOSITORY_URL" ]; then
+   REPOSITORY_URL=https://github.com/$REPOSITORY_NAME.git
+fi
+
+case "$REPOSITORY_NAME" in
+   user_name\super_repo)
+      ~/bin/pip install --upgrade git+$REPOSITORY_URL@${COMMIT_HASH-$BRANCH}
+      ;;
+esac

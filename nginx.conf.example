@@ -1,0 +1,30 @@
+location /.github {
+    autoindex off;
+    allow all;
+
+    content_by_lua_block {
+       local delivery_id = ngx.var.http_x_github_delivery
+       local event = ngx.var.http_x_github_event
+       local signature = ngx.var.http_x_hub_signature
+
+       if ngx.var.request_method == 'POST' and delivery_id ~= nil and event ~= nil and signature ~=null then
+          local fname = '/var/lib/github/events/'..delivery_id..'.'..event
+          local signname = '/var/lib/github/events/'..delivery_id..'.sign'
+
+          local f = assert(io.open(signname, 'w'))
+          f:write(signature)
+          f:close()
+
+          f = assert(io.open(fname, 'w'))
+          ngx.req.read_body()
+          f:write(ngx.req.get_body_data())
+          f:close()
+
+          os.execute('chmod 664 '..fname)
+          ngx.say( delivery_id )
+
+       else
+          ngx.exit(400)
+       end
+    }
+}
